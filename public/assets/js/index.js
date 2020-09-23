@@ -25,7 +25,9 @@ const saveNote = (note) => {
 };
 
 // A function for deleting a note from the db
-const deleteNote = (id) => {
+const deleteNote = (note) => {
+  console.log("id", note.id);
+  var id = note.id;
   return $.ajax({
     url: "api/notes/" + id,
     method: "DELETE",
