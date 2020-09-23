@@ -1,43 +1,30 @@
-const path = require("path");
+const db = require("../db/db.json");
 const fs = require("fs");
-const { v1: uuidv1 } = require("uuid");
-const indexData = require("../db/db.json");
 
 module.exports = function(app){
 
     app.get("/api/notes", function(req, res) {
-        res.sendFile(path.join(__dirname, "../db/db.json"));
+        res.json(db);
     });
     
     app.post("/api/notes", function(req, res){
-        const data = fs.readFileSync(path.join(__dirname, "../db/db.json"));
-        const parseData = JSON.parse(data);
-        parseData.push(newNote);
-
-        const output = JSON.stringify(parseData, null, 2);
-
-        fs.writeFile(path.join(__dirname, "../db/db.json"), output, function(err){
-            if (err) throw err;
+        db.push(req.body);
+        db.forEach((data, index) => {
+            data.id = index + 1
         });
-
-        res.json(output).status(201);
+        fs.writeFile("./db/db.json", JSON.stringify(db), function() {
+            res.json(db);
+        });
     });
     
     app.delete("/api/notes/:id", function(req, res){
-        const data = fs.readFileSync(path.join(__dirname, "../db/db.json"));
-        const parseData = JSON.parse(data);
-        console.log("param id", req.params.id);
-
-        const filterData = parseData.filter((notes) => notes.id !== req.params.id);
-
-        const output = JSON.stringify(filterData, null, 2);
-        fs.writeFile(path.join(__dirname, "../db/db.json"), output, function(err){
-            if (err) throw err;
-        });
-
-        res.status(200).json(output);
+       const id = req.params.id;
+       db.splice(id - 1, 1);
+       db.forEach((data, index) => {
+           data.id = index + 1;
+       });
+       fs.writeFile("./db/db.json", JSON.stringify(db), function() {
+           res.json(db);
+       });
     }); 
 };
-
-
-
